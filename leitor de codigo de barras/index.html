@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leitor de Código de Barras</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+      overflow: hidden;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+    #preview {
+      width: 100%;
+      max-width: 600px;
+      height: 400px;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 1.5rem;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+    #result.success {
+      background: rgba(46, 204, 113, 0.8);
+      transform: scale(1.1);
+    }
+    #result.error {
+      background: rgba(231, 76, 60, 0.8);
+    }
+    .scan-animation {
+      animation: scan 1.5s infinite linear;
+    }
+    @keyframes scan {
+      0% { box-shadow: inset 0 -5px 15px rgba(46, 204, 113, 0.5); }
+      50% { box-shadow: inset 0 -5px 15px rgba(46, 204, 113, 1); }
+      100% { box-shadow: inset 0 -5px 15px rgba(46, 204, 113, 0.5); }
+    }
+    footer {
+      position: absolute;
+      bottom: 10px;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <h1>Leitor de Código de Barras</h1>
+  <video id="preview" class="scan-animation"></video>
+  <div id="result">Aguardando leitura...</div>
+  <footer>Desenvolvido por você 😉</footer>
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
+  <script>
+    const codeReader = new ZXing.BrowserBarcodeReader();
+    const videoElement = document.getElementById('preview');
+    const resultElement = document.getElementById('result');
+
+    codeReader.getVideoInputDevices().then((videoInputDevices) => {
+      const firstDeviceId = videoInputDevices[0].deviceId;
+      codeReader.decodeFromVideoDevice(firstDeviceId, 'preview', (result, err) => {
+        if (result) {
+          resultElement.textContent = `Código lido: ${result.text}`;
+          resultElement.classList.add('success');
+          resultElement.classList.remove('error');
+          console.log(result);
+        }
+        if (err && !(err instanceof ZXing.NotFoundException)) {
+          resultElement.textContent = "Erro ao ler o código";
+          resultElement.classList.add('error');
+          resultElement.classList.remove('success');
+          console.error(err);
+        }
+      });
+    }).catch((err) => {
+      console.error(err);
+      resultElement.textContent = "Erro ao acessar a câmera.";
+      resultElement.classList.add('error');
+    });
+  </script>
+</body>
+</html>
